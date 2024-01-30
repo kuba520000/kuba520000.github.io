@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<link rel="stylesheet" href="CSS.css">
 	<title>Simple Whiteboard</title>
 	<style>
 		#whiteboard {
@@ -16,14 +17,13 @@
 	<input type="color" onchange="changeColor(this.value)">
 	<input type="range" min="1" max="50" value="5" onchange="changeSize(this.value)">
 	<button onclick="toggleEraser()">Eraser</button>
-
+	
 	<script>
-
+		
 		const canvas = document.getElementById('whiteboard');
-		canvas.width = 1700;
-		canvas.height = 900;
 		const ctx = canvas.getContext('2d');
-
+		canvas.width=window.innerWidth-30;
+		canvas.height=window.innerHeight-60;
 		let color = 'black';
 		let size = 5;
 		let eraser = false;
