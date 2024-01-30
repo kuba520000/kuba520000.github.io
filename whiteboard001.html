@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Simple Whiteboard</title>
+	<style>
+		#whiteboard {
+			border: 2px solid black;
+			background-color: white;
+			cursor: crosshair;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="whiteboard"></canvas>
+
+	<input type="color" onchange="changeColor(this.value)">
+	<input type="range" min="1" max="50" value="5" onchange="changeSize(this.value)">
+	<button onclick="toggleEraser()">Eraser</button>
+
+	<script>
+
+		const canvas = document.getElementById('whiteboard');
+		canvas.width = 1700;
+		canvas.height = 900;
+		const ctx = canvas.getContext('2d');
+
+		let color = 'black';
+		let size = 5;
+		let eraser = false;
+
+		function draw(e) {
+			if (e.buttons !== 1) return;
+
+			ctx.beginPath();
+			ctx.lineWidth = size;
+			ctx.lineCap = 'round';
+			ctx.strokeStyle = eraser ? 'white' : color;
+			ctx.moveTo(prevX, prevY);
+			ctx.lineTo(e.offsetX, e.offsetY);
+			ctx.stroke();
+
+			prevX = e.offsetX;
+			prevY = e.offsetY;
+		}
+
+		let prevX, prevY;
+
+		canvas.addEventListener('mousedown', (e) => {
+			prevX = e.offsetX;
+			prevY = e.offsetY;
+		});
+
+		canvas.addEventListener('mousemove', draw);
+
+		canvas.addEventListener('mouseup', () => {
+			prevX = null;
+			prevY = null;
+		});
+
+		canvas.addEventListener('mouseout', () => {
+			prevX = null;
+			prevY = null;
+			prevY = null;
+		});
+
+		function changeColor(c) {
+			color = c;
+		}
+
+		function changeSize(s) {
+			size = s;
+		}
+
+		function toggleEraser() {
+			eraser = !eraser;
+		}
+	</script>
+</body>
+</html>
