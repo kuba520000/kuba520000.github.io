@@ -1,79 +1,124 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<link rel="stylesheet" href="CSS.css">
-	<title>Simple Whiteboard</title>
-	<style>
-		#whiteboard {
-			border: 2px solid black;
-			background-color: white;
-			cursor: crosshair;
-		}
-	</style>
+    <link rel="stylesheet" href="CSS.css">
+    <title>Whiteboard</title>
+    <style>
+        #whiteboard {
+            border: 2px solid rgb(70, 69, 69);
+            background-color: 'bgcolor';
+            cursor: crosshair;
+        }
+    </style>
+
 </head>
-<body>
-	<canvas id="whiteboard"></canvas>
+<body style="background-color:rgb(160, 160, 160);">
+    <canvas id="whiteboard"></canvas>
 
-	<input type="color" onchange="changeColor(this.value)">
-	<input type="range" min="1" max="50" value="5" onchange="changeSize(this.value)">
-	<button onclick="toggleEraser()">Eraser</button>
-	
-	<script>
+    <input type="color" onchange="changeColor(this.value)">
+    <input type="color" oninput="changeBGColor(this.value)">
+    <input type="range" min="1" max="100" value="5" onchange="changeSize(this.value)">
+    <button onclick="toggleEraser()">Eraser</button>
+
+    <script>
 		
-		const canvas = document.getElementById('whiteboard');
-		const ctx = canvas.getContext('2d');
-		canvas.width=window.innerWidth-30;
-		canvas.height=window.innerHeight-60;
-		let color = 'black';
-		let size = 5;
-		let eraser = false;
 
-		function draw(e) {
+        const canvas = document.getElementById('whiteboard');
+        const ctx = canvas.getContext('2d');
+        canvas.width=window.innerWidth-30;
+        canvas.height=window.innerHeight-60;
+        let color = 'black';
+        let bgcolor = 'white';
+        let size = 5;
+        let eraser = false;
+		let startX, startY;
+
+		const tempCanvas = document.createElement('canvas');
+		const tempCtx = tempCanvas.getContext('2d');
+		tempCanvas.width = canvas.width;
+		tempCanvas.height = canvas.height;
+		document.body.appendChild(tempCanvas);
+        function draw(e) {
+            if (e.buttons !== 1) return;
+
+            ctx.beginPath();
+            ctx.lineWidth = size;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = eraser ? bgcolor : color;
+            ctx.moveTo(prevX, prevY);
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+
+
+            prevX = e.offsetX;
+            prevY = e.offsetY;
+        }
+
+        let prevX, prevY;
+
+        canvas.addEventListener('mousedown', (e) => {
+            prevX = e.offsetX;
+            prevY = e.offsetY;
+        });
+		
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Shift') {
+				startX = prevX;
+				startY = prevY;
+			}
+		});
+
+		document.addEventListener('keyup', (e) => {
+			if (e.key === 'Shift') {
+				ctx.drawImage(tempCanvas, 0, 0); 
+				tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height); 
+			}
+		});
+
+
+        canvas.addEventListener('mousemove', (e) => {
 			if (e.buttons !== 1) return;
 
-			ctx.beginPath();
-			ctx.lineWidth = size;
-			ctx.lineCap = 'round';
-			ctx.strokeStyle = eraser ? 'white' : color;
-			ctx.moveTo(prevX, prevY);
-			ctx.lineTo(e.offsetX, e.offsetY);
-			ctx.stroke();
-
-			prevX = e.offsetX;
-			prevY = e.offsetY;
-		}
-
-		let prevX, prevY;
-
-		canvas.addEventListener('mousedown', (e) => {
-			prevX = e.offsetX;
-			prevY = e.offsetY;
+			if (e.shiftKey) {
+				tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+				tempCtx.lineWidth = size;
+				tempCtx.beginPath();
+				tempCtx.moveTo(startX, startY);
+				tempCtx.lineTo(e.offsetX, e.offsetY);
+				tempCtx.stroke();
+			} else {
+				draw(e);
+			}
 		});
 
-		canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', () => {
+            prevX = null;
+            prevY = null;
+        });
 
-		canvas.addEventListener('mouseup', () => {
-			prevX = null;
-			prevY = null;
-		});
+        canvas.addEventListener('mouseout', () => {
+            prevX = null;
+            prevY = null;
+            prevY = null;
+        });
 
-		canvas.addEventListener('mouseout', () => {
-			prevX = null;
-			prevY = null;
-			prevY = null;
-		});
+        function changeColor(c) {
+            color = c;
+        }
 
-		function changeColor(c) {
-			color = c;
-		}
+        function changeBGColor(b) {
+            bgcolor = b;
+            canvas.style.backgroundColor = bgcolor;
+        }
 
-		function changeSize(s) {
-			size = s;
-		}
+        function changeSize(s) {
+            size = s;
+        }
 
-		function toggleEraser() {
-			eraser = !eraser;
-		}
-	</script>
+        function toggleEraser() {
+            eraser = !eraser;
+            ctx.globalCompositeOperation = eraser ? 'destination-out' : 'source-over';
+        }
+    </script>
 </body>
 </html>
